@@ -21,9 +21,6 @@
       <button @click="sendChatAudioMsg">发送</button>
     </div>
     <button class="switchInputButton" @click="switchInput">切换输入方式</button>
-    
-    
-    
   </div>
 </template>
 

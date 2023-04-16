@@ -9,11 +9,16 @@
 
 <script>
 import SideBar from './components/SideBar.vue';
+import api from './api/index'
 
 export default{
   name: 'App',
   components: {
     SideBar
+  },
+  mounted(){
+    
+    getBackground()
   }
 }
 
