@@ -48,26 +48,28 @@ export default {
   methods:{
     sendChatTextMsg(){
       // TODO 网络请求发送
-      console.log(this.textMsg.content)
-      this.textMsg.timestamp = new Date().getTime();
-      this.textMsg.datetime = parseTime(this.textMsg.timestamp)
-      this.msgArr.push(this.textMsg);
-      this.textMsg = {
-        timestamp: 0,
-        datetime: "",
-        content: "",
-        content_type: 0,
-        sender_type: 0
-      };
-      const timestamp_now = new Date().getTime();
-      const response_msg = {
-        timestamp: timestamp_now,
-        datetime: parseTime(timestamp_now),
-        content: "a response text msg",
-        content_type: 0,
-        sender_type: 1
+      if(this.textMsg.content!=""){
+          console.log(this.textMsg.content)
+        this.textMsg.timestamp = new Date().getTime();
+        this.textMsg.datetime = parseTime(this.textMsg.timestamp)
+        this.msgArr.push(this.textMsg);
+        this.textMsg = {
+          timestamp: 0,
+          datetime: "",
+          content: "",
+          content_type: 0,
+          sender_type: 0
+        };
+        const timestamp_now = new Date().getTime();
+        const response_msg = {
+          timestamp: timestamp_now,
+          datetime: parseTime(timestamp_now),
+          content: "a response text msg",
+          content_type: 0,
+          sender_type: 1
+        }
+        this.msgArr.push(response_msg)
       }
-      this.msgArr.push(response_msg)
     }
   },
 }
