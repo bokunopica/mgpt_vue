@@ -1,9 +1,5 @@
 <template>
   <div class="chatWindow">
-    <div class="windowTop">
-      <button class="switchInputButton" @click="switchInput">切换输入方式</button>
-    </div>
-
     <ul>
 
       <li v-for="(msg, index) in msgArr" :class="`msg_sender_${msg.sender_type}`">
@@ -14,15 +10,17 @@
         </div>
       </li>
     </ul>
+
     <div class="chatInputMsg" v-if="is_text">
       <input type="text" v-model="textMsg.content" @keyup.enter.native="sendChatTextMsg">
       <button @click="sendChatTextMsg">发送</button>
     </div>
     <div class="audioInputMsg" v-if="is_audio">
-      <button @click="playRecord" v-if="this.audioMsg.duration">播放录音: {{ this.audioMsg.duration }}s</button>
+      <button class="playAudioTest" @click="playRecord" v-if="this.audioMsg.duration">播放录音: {{ this.audioMsg.duration }}s</button>
       <button @mousedown="startRecord" @mouseup="endRecord">{{record_status_msg}}</button>
       <button @click="sendChatAudioMsg">发送</button>
     </div>
+    <button class="switchInputButton" @click="switchInput">切换输入方式</button>
     
     
     
@@ -176,16 +174,15 @@ export default {
   height: 98%;
 }
 .chatInputMsg{
-  margin-top: -1;
   bottom: 1%;
   width: 95%;
   position: inherit;
 }
 
 .audioInputMsg{
-  margin-top: -1;
   bottom: 1%;
-  width: 95%;
+  left: 70%;
+  right: 5%;
   position: inherit;
 }
 
@@ -200,9 +197,9 @@ button{
 }
 
 .switchInputButton{
-  position:relative;
-  left: 0;
-  top: 0;
+  position:absolute;
+  right: 3%;
+  bottom: 1%;
 }
 
 .windowTop{
@@ -265,6 +262,11 @@ li.msg_sender_1 div {
   /* border-radius: 15px 0 15px 15px; */
   background-color: rgba(0, 0, 0, 0.1);
   padding: 10px 15px;
+}
+
+.playAudioTest{
+  position:absolute;
+  bottom: 120%;
 }
 
 
