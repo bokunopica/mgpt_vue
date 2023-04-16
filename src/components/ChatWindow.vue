@@ -31,20 +31,20 @@ export default {
   data(){
     return {
       msgArr: [
-        {
-          timestamp: 1681622395180,
-          datetime: parseTime(1681622395180),
-          content: "aaa",
-          content_type: 0,
-          sender_type: 0 
-        },
-        {
-          timestamp: 1681622395180,
-          datetime: parseTime(1681622395180),
-          content: "bbb",
-          content_type: 0,
-          sender_type: 1 
-        }
+        // {
+        //   timestamp: 1681622395180,
+        //   datetime: parseTime(1681622395180),
+        //   content: "aaa",
+        //   content_type: 0,
+        //   sender_type: 0 
+        // },
+        // {
+        //   timestamp: 1681622395180,
+        //   datetime: parseTime(1681622395180),
+        //   content: "bbb",
+        //   content_type: 0,
+        //   sender_type: 1 
+        // }
       ],
       textMsg: {
         timestamp: 0,
@@ -102,8 +102,6 @@ export default {
       // 结束录音
       this.record_status_msg = "长按录音"
       this.recorderObj.stop();
-      this.audioMsg.timestamp = new Date().getTime();
-      this.audioMsg.datetime = parseTime(this.audioMsg.timestamp);
       this.audioMsg.content = this.recorderObj.getWAVBlob();
       this.audioMsg.duration = this.recorderObj.duration;
     },
@@ -119,6 +117,8 @@ export default {
       // TODO 网络请求发送
       if(this.recorderObj.size!=0){
         console.log(this.audioMsg)
+        this.audioMsg.timestamp = new Date().getTime();
+        this.audioMsg.datetime = parseTime(this.audioMsg.timestamp);
         this.msgArr.push(this.audioMsg);
         this.audioMsg = {
           timestamp: 0,
