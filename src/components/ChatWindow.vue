@@ -1,13 +1,19 @@
 <template>
   <div class="chatWindow">
-    <div v-for="(msg, index) in msgArr" :sender_type="msg.sender_type">
-      <span class="sender">{{ (msg.sender_type?"服务器":"你") + "---"   }}</span>
-      <span class="msgTimestamp">{{ msg.datetime }} </span>
-      <div class="msgContent" v-if="!msg.content_type">{{ msg.content }}</div>
-      <div class="audioMsgContent" v-if="msg.content_type">
-        <button @click="playMsgRecord(msg.content)">播放录音: {{ msg.duration }}s</button>
-      </div>
+    <div class="windowTop">
+      <button class="switchInputButton" @click="switchInput">切换输入方式</button>
     </div>
+
+    <ul>
+
+      <li v-for="(msg, index) in msgArr" :class="`msg_sender_${msg.sender_type}`">
+        <span class="sender">{{ (msg.sender_type?"服务器":"你") + "[" + msg.datetime+ "]:"   }} </span><br>
+        <span class="msgContent" v-if="!msg.content_type">{{ msg.content }}</span>
+        <div class="audioMsgContent" v-if="msg.content_type">
+          <button @click="playMsgRecord(msg.content)">播放录音: {{ msg.duration }}s</button>
+        </div>
+      </li>
+    </ul>
     <div class="chatInputMsg" v-if="is_text">
       <input type="text" v-model="textMsg.content" @keyup.enter.native="sendChatTextMsg">
       <button @click="sendChatTextMsg">发送</button>
@@ -17,7 +23,8 @@
       <button @mousedown="startRecord" @mouseup="endRecord">{{record_status_msg}}</button>
       <button @click="sendChatAudioMsg">发送</button>
     </div>
-    <button class="switchInputButton" @click="switchInput">切换输入方式</button>
+    
+    
     
   </div>
 </template>
@@ -150,6 +157,9 @@ export default {
     let recorder = new Recorder();
     this.recorderObj = recorder;
   },
+  updated(){
+    console.log('updated');
+  },
   unmounted(){
     this.recorderObj = null;
   }
@@ -190,10 +200,74 @@ button{
 }
 
 .switchInputButton{
-  position: absolute;
+  position:relative;
   left: 0;
   top: 0;
 }
+
+.windowTop{
+  position: inherit;
+  top: 0;
+}
+
+.msg_sender_0{
+  position:relative;
+  right: 0;
+}
+
+
+.msg_sender_1{
+  position:relative;
+  left: 0;
+}
+
+ul {
+  list-style: none;
+  padding: 20px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+li.msg_sender_1 {
+  margin-right: 20px;
+  text-align: left;
+}
+
+li.msg_sender_1 span {
+  display: inline-block;
+  /* border-radius: 0 15px 15px; */
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 10px 15px;
+}
+
+li.msg_sender_0 {
+  margin-left: 20px;
+  text-align: right;
+}
+
+li.msg_sender_0 span {
+  display: inline-block;
+  /* border-radius: 15px 0 15px 15px; */
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 10px 15px;
+}
+
+li.msg_sender_0 div {
+  display: inline-block;
+  /* border-radius: 15px 0 15px 15px; */
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 10px 15px;
+}
+
+li.msg_sender_1 div {
+  display: inline-block;
+  /* border-radius: 15px 0 15px 15px; */
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 10px 15px;
+}
+
+
 
 </style>
 
