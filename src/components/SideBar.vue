@@ -28,9 +28,7 @@ export default {
   border: solid 1px;
   width: 100%;
   height: 5%;
-  padding-top: 25%;
-  /* padding-bottom: 5px; */
-
+  padding-top: 20%;
 }
 
 </style>
