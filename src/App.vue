@@ -3,8 +3,12 @@
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link>
   </nav> -->
+  <div class="mainDiv">
+    
+  </div>
   <SideBar />
   <router-view/>
+  
 </template>
 
 <script>
@@ -16,10 +20,6 @@ export default{
   components: {
     SideBar
   },
-  mounted(){
-    
-    getBackground()
-  }
 }
 
 
@@ -45,5 +45,14 @@ nav a {
 
 nav a.router-link-exact-active {
   color: #42b983;
+}
+
+.mainDiv{
+  background-image: url("https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE4wHeX?ver=a93f");
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  background-repeat: repeat-y;
+  opacity: 15%;
 }
 </style>
