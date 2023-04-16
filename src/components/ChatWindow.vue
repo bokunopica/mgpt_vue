@@ -25,6 +25,7 @@
 <script>
 import { parseTime } from "@/utils/date";
 import Recorder from 'js-audio-recorder';
+import roundNum from '@/utils/round'
 
 export default {
   name: 'ChatWindow',
@@ -103,7 +104,7 @@ export default {
       this.record_status_msg = "长按录音"
       this.recorderObj.stop();
       this.audioMsg.content = this.recorderObj.getWAVBlob();
-      this.audioMsg.duration = this.recorderObj.duration;
+      this.audioMsg.duration = roundNum(this.recorderObj.duration, 2);
     },
     playRecord(){
       // 播放录音
