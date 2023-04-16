@@ -5,16 +5,23 @@
       <span class="msgTimestamp">{{ msg.datetime }} </span>
       <div class="msgContent">{{ msg.content }}</div>
     </div>
-    <div class="chatInputMsg">
+    <div class="chatInputMsg" v-if="is_text">
       <input type="text" v-model="textMsg.content" @keyup.enter.native="sendChatTextMsg">
       <button @click="sendChatTextMsg">发送</button>
     </div>
+    <div class="audioInputMsg" v-if="is_audio">
+      <button @click="playRecord">播放录音</button>
+      <button @mousedown="startRecord" @mouseup="endRecord">{{record_status_msg}}</button>
+      <button @click="sendAudioTextMsg">发送</button>
+    </div>
+    <button>切换输入方式</button>
     
   </div>
 </template>
 
 <script>
 import { parseTime } from "@/utils/date";
+import Recorder from 'js-audio-recorder';
 
 export default {
   name: 'ChatWindow',
@@ -42,7 +49,18 @@ export default {
         content: "",
         content_type: 0,
         sender_type: 0
-      }
+      },
+      audioMsg:{
+        timestamp: 0,
+        datetime: "",
+        content: null,
+        content_type: 1,
+        sender_type: 0
+      },
+      is_text: 0,
+      is_audio: 1,
+      record_status_msg: "长按录音",
+      recorderObj: null,
     }
   },
   methods:{
@@ -70,8 +88,55 @@ export default {
         }
         this.msgArr.push(response_msg)
       }
-    }
+    },
+    startRecord(){
+      // 开始录音
+      this.record_status_msg = "正在录音"
+      this.recorderObj.start()
+    },
+    endRecord(){
+      // 结束录音
+      this.record_status_msg = "长按录音"
+      this.recorderObj.stop();
+    },
+    playRecord(){
+      // 播放录音
+      this.recorderObj.play();
+    },
+    sendAudioTextMsg(){
+      // TODO 网络请求发送
+      if(this.textMsg.content!=""){
+          console.log(this.textMsg.content)
+        this.textMsg.timestamp = new Date().getTime();
+        this.textMsg.datetime = parseTime(this.textMsg.timestamp)
+        this.msgArr.push(this.textMsg);
+        this.textMsg = {
+          timestamp: 0,
+          datetime: "",
+          content: "",
+          content_type: 0,
+          sender_type: 0
+        };
+        const timestamp_now = new Date().getTime();
+        const response_msg = {
+          timestamp: timestamp_now,
+          datetime: parseTime(timestamp_now),
+          content: "a response text msg",
+          content_type: 0,
+          sender_type: 1
+        }
+        this.msgArr.push(response_msg)
+      }
+    },
   },
+  mounted(){
+    navigator.mediaDevices.getUserMedia({ audio: true }); 
+    let recorder = new Recorder();
+    this.recorderObj = recorder;
+  },
+  unmounted(){
+    this.recorderObj = null;
+  }
 }
 </script>
 
@@ -85,6 +150,13 @@ export default {
   height: 98%;
 }
 .chatInputMsg{
+  margin-top: -1;
+  bottom: 1%;
+  width: 95%;
+  position: inherit;
+}
+
+.audioInputMsg{
   margin-top: -1;
   bottom: 1%;
   width: 95%;
