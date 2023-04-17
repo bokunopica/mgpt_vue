@@ -17,11 +17,17 @@ const api = {
         return result.data
     },
     async getAudioMsgResponse(data){
-        let result = await axios_instance.post(
-            path.baseUrl+path.mgptAudioMsg,
-            data
-        );
-        return result.data
+        // let result = await axios_instance.post(
+        //     path.baseUrl+path.mgptAudioMsg,
+        //     data,
+        // );
+        let result = await axios_instance({
+            method: 'post',
+            url: path.baseUrl+path.mgptAudioMsg,
+            data: data,
+            responseType: 'blob',
+        });
+        return result.data 
     },
     async AudioToTextResponse(data){
         let result = await axios({
@@ -31,7 +37,8 @@ const api = {
             headers: {
               'Content-Type': 'multipart/form-data', // 关键
             },
-          })
+        });
+        console.log(result.data);
         return result.data
     }
 }

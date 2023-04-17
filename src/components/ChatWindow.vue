@@ -63,6 +63,7 @@ export default {
         timestamp: 0,
         datetime: "",
         content: null,
+        pcm_content: null,
         content_type: 1,
         sender_type: 0,
         duration: 0,
@@ -101,6 +102,33 @@ export default {
         this.msgArr.push(response_msg)
       }
     },
+    base64ToBlob(base64, fileType) {
+      //先验证是否已经有了类型，如果没有就转换，有的话就不管
+      let splitArr = base64.split(',');
+      let matchArray = splitArr[0].match(/:(.*?);/);//获取data:fileType;base64中得fileType
+      if (matchArray[1] == "") {//假如不存在的话
+        let typeHeader = 'data:audio/' + fileType + ';base64,'; // 定义base64 头部文件类型
+        let audioSrc = typeHeader + splitArr[1]; // 拼接最终的base64
+        let arr = audioSrc.split(',');
+        let array = arr[0].match(/:(.*?);/);
+        let mime = (array && array.length > 1 ? array[1] : type) || type;
+        // 去掉url的头，并转化为byte
+        let bytes = atob(arr[1])
+        // 处理异常,将ascii码小于0的转换为大于0
+        let ab = new ArrayBuffer(bytes.length);
+        // 生成视图（直接针对内存）：8位无符号整数，长度1个字节
+        let ia = new Uint8Array(ab);
+        for (let i = 0; i < bytes.length; i++) {
+          ia[i] = bytes.charCodeAt(i);
+        }
+        let temp = new Blob([ab], {
+          type: mime
+        });
+        fileName = window.URL.createObjectURL(temp);
+      }else {
+        fileName = base64;
+      }
+    },
     startRecord(){
       // 开始录音
       this.record_status_msg = "正在录音"
@@ -111,15 +139,16 @@ export default {
       this.record_status_msg = "长按录音"
       this.recorderObj.stop();
       this.audioMsg.content = this.recorderObj.getWAVBlob();
+      this.audioMsg.pcm_content = this.recorderObj.getPCMBlob();
       this.audioMsg.duration = roundNum(this.recorderObj.duration, 2);
     },
     playRecord(){
       // 播放录音
       // Recorder.playAudio(this.audioMsg.content);
       this.recorderObj.play();
+      this.recorderObj.downloadWAV('test')
     },
     playMsgRecord(content){
-      console.log(content)
       // Recorder.playAudio(content);
       this.recorderObj.play(content);
     },
@@ -128,13 +157,11 @@ export default {
       if(this.audioMsg.duration!=0){
         // PCM流数据写入formData
         var formData = new FormData();
-        formData.append('audio', this.audioMsg.content)
+        formData.append('audio', this.audioMsg.content);
+        console.log(formData.get('audio'));
 
         this.audioMsg.timestamp = new Date().getTime();
         this.audioMsg.datetime = parseTime(this.audioMsg.timestamp);
-
-
-        
         
         // get text info from backend Audio2Text
         let a2t_response = await api.AudioToTextResponse(formData);
@@ -156,6 +183,7 @@ export default {
           timestamp: 0,
           datetime: "",
           content: null,
+          pcm_content: null,
           content_type: 1,
           sender_type: 0,
           duration: 0,
@@ -165,12 +193,14 @@ export default {
 
         var audio_blob = new Blob(
           [buf_response], 
+          {type:'audio/wav'},
         ); 
 
         let response = {
           timestamp: new Date().getTime(),
           datetime: "",
           content: null,
+          pcm_content: null,
           content_type: 1,
           sender_type: 1,
           duration: 0,
