@@ -1,5 +1,6 @@
 import axios_instance from "../utils/request"
 import path from "../api/path"
+import axios from "axios";
 
 const api = {
     // bing每日一图
@@ -8,8 +9,29 @@ const api = {
         let data = axios_instance.get(url);
         return data.images[0].url;
     },
-    async getTextMsgResponse(){
-        let result = await axios_instance.post(path.baseUrl+path.mgptTextMsg);
+    async getTextMsgResponse(data){
+        let result = await axios_instance.post(
+            path.baseUrl+path.mgptTextMsg,
+            data
+        );
+        return result.data
+    },
+    async getAudioMsgResponse(data){
+        let result = await axios_instance.post(
+            path.baseUrl+path.mgptAudioMsg,
+            data
+        );
+        return result.data
+    },
+    async AudioToTextResponse(data){
+        let result = await axios({
+            method: 'post',
+            url: path.baseUrl+path.audioToText,
+            data: data,
+            headers: {
+              'Content-Type': 'multipart/form-data', // 关键
+            },
+          })
         return result.data
     }
 }

@@ -6,8 +6,10 @@
         <span class="sender">{{ (msg.sender_type?"服务器":"你") + "[" + msg.datetime+ "]:"   }} </span><br>
         <span class="msgContent" v-if="!msg.content_type">{{ msg.content }}</span>
         <div class="audioMsgContent" v-if="msg.content_type">
-          <button @click="playMsgRecord(msg.content)">播放录音: {{ msg.duration }}s</button>
-        </div>
+          <!-- <button @click="playMsgRecord(msg.content)">播放录音: {{ msg.duration }}s</button> -->
+          <audio controls currentTime :src="msg.audio_url"></audio>
+        </div><br>
+        <span class="msgContent" v-if="msg.text_content">{{ msg.text_content }}</span>
       </li>
     </ul>
 
@@ -27,7 +29,7 @@
 <script>
 import { parseTime } from "@/utils/date";
 import Recorder from 'js-audio-recorder';
-import roundNum from '@/utils/round'
+import roundNum from '@/utils/round';
 import api from "@/api";
 
 export default {
@@ -55,7 +57,7 @@ export default {
         datetime: "",
         content: "",
         content_type: 0,
-        sender_type: 0
+        sender_type: 0,
       },
       audioMsg:{
         timestamp: 0,
@@ -64,6 +66,8 @@ export default {
         content_type: 1,
         sender_type: 0,
         duration: 0,
+        text_content: "",
+        audio_url: "",
       },
       is_text: 0,
       is_audio: 1,
@@ -90,7 +94,9 @@ export default {
         //   content_type: 0,
         //   sender_type: 1
         // }
-        let response_msg = await api.getTextMsgResponse();
+        let response_msg = await api.getTextMsgResponse({
+          "question": this.textMsg.content
+        });
         response_msg.datetime = parseTime(response_msg.timestamp);
         this.msgArr.push(response_msg)
       }
@@ -104,7 +110,7 @@ export default {
       // 结束录音
       this.record_status_msg = "长按录音"
       this.recorderObj.stop();
-      this.audioMsg.content = this.recorderObj.getPCMBlob();
+      this.audioMsg.content = this.recorderObj.getWAVBlob();
       this.audioMsg.duration = roundNum(this.recorderObj.duration, 2);
     },
     playRecord(){
@@ -113,38 +119,74 @@ export default {
       this.recorderObj.play();
     },
     playMsgRecord(content){
+      console.log(content)
+      // Recorder.playAudio(content);
       this.recorderObj.play(content);
     },
-    sendChatAudioMsg(){
+    async sendChatAudioMsg(){
       // 网络请求发送
-      if(this.recorderObj.size!=0){
-        console.log(this.audioMsg)
+      if(this.audioMsg.duration!=0){
+        // PCM流数据写入formData
+        var formData = new FormData();
+        formData.append('audio', this.audioMsg.content)
+
         this.audioMsg.timestamp = new Date().getTime();
         this.audioMsg.datetime = parseTime(this.audioMsg.timestamp);
+
+
+        
+        
+        // get text info from backend Audio2Text
+        let a2t_response = await api.AudioToTextResponse(formData);
+        this.audioMsg.text_content = a2t_response['text'];
+
+        // audio_url
+        this.audioMsg.audio_url = window.URL.createObjectURL(this.audioMsg.content)
+        
+
         this.msgArr.push(this.audioMsg);
+        
+        // ask the question
+        // get audio return
+        let buf_response = await api.getAudioMsgResponse({
+          "question": this.audioMsg.text_content
+        });
+
         this.audioMsg = {
           timestamp: 0,
           datetime: "",
           content: null,
           content_type: 1,
           sender_type: 0,
-          duration: 0
+          duration: 0,
+          text_content: "",
+          audio_url: "",
         };
-        const timestamp_now = new Date().getTime();
-        const response_msg = {
-          timestamp: timestamp_now,
-          datetime: parseTime(timestamp_now),
-          content: "a response text msg for audio msg",
-          content_type: 0,
-          sender_type: 1
-        }
-        this.msgArr.push(response_msg)
+
+        var audio_blob = new Blob(
+          [buf_response], 
+        ); 
+
+        let response = {
+          timestamp: new Date().getTime(),
+          datetime: "",
+          content: null,
+          content_type: 1,
+          sender_type: 1,
+          duration: 0,
+          text_content: "",
+          audio_url: window.URL.createObjectURL(audio_blob),
+        };
+        response.content = audio_blob;
+        response.duration = audio_blob.size/32000;
+        response.datetime = parseTime(response.timestamp);
+        this.msgArr.push(response)
       }
     },
     switchInput(){
       this.is_text = !this.is_text;
       this.is_audio = !this.is_audio;
-    }
+    },
   },
   mounted(){
     navigator.mediaDevices.getUserMedia({ audio: true }); 
