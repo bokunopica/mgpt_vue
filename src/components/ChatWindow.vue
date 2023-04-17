@@ -1,7 +1,6 @@
 <template>
-  <div class="chatWindow">
+  <div class="chatWindow" id="chatWindow">
     <ul>
-
       <li v-for="(msg, index) in msgArr" :class="`msg_sender_${msg.sender_type}`">
         <span class="sender">{{ (msg.sender_type?"服务器":"你") + "[" + msg.datetime+ "]:"   }} </span><br>
         <span class="msgContent" v-if="!msg.content_type">{{ msg.content }}</span>
@@ -12,7 +11,9 @@
         <span class="msgContent" v-if="msg.text_content">{{ msg.text_content }}</span>
       </li>
     </ul>
-
+    <div><a id="msg_end" name="1" href="#1">&nbsp</a></div>
+  </div>
+  <div class="chatInput">
     <div class="chatInputMsg" v-if="is_text">
       <input type="text" v-model="textMsg.content" @keyup.enter.native="sendChatTextMsg">
       <button @click="sendChatTextMsg">发送</button>
@@ -24,6 +25,7 @@
     </div>
     <button class="switchInputButton" @click="switchInput">切换输入方式</button>
   </div>
+
 </template>
 
 <script>
@@ -99,34 +101,8 @@ export default {
           "question": this.textMsg.content
         });
         response_msg.datetime = parseTime(response_msg.timestamp);
-        this.msgArr.push(response_msg)
-      }
-    },
-    base64ToBlob(base64, fileType) {
-      //先验证是否已经有了类型，如果没有就转换，有的话就不管
-      let splitArr = base64.split(',');
-      let matchArray = splitArr[0].match(/:(.*?);/);//获取data:fileType;base64中得fileType
-      if (matchArray[1] == "") {//假如不存在的话
-        let typeHeader = 'data:audio/' + fileType + ';base64,'; // 定义base64 头部文件类型
-        let audioSrc = typeHeader + splitArr[1]; // 拼接最终的base64
-        let arr = audioSrc.split(',');
-        let array = arr[0].match(/:(.*?);/);
-        let mime = (array && array.length > 1 ? array[1] : type) || type;
-        // 去掉url的头，并转化为byte
-        let bytes = atob(arr[1])
-        // 处理异常,将ascii码小于0的转换为大于0
-        let ab = new ArrayBuffer(bytes.length);
-        // 生成视图（直接针对内存）：8位无符号整数，长度1个字节
-        let ia = new Uint8Array(ab);
-        for (let i = 0; i < bytes.length; i++) {
-          ia[i] = bytes.charCodeAt(i);
-        }
-        let temp = new Blob([ab], {
-          type: mime
-        });
-        fileName = window.URL.createObjectURL(temp);
-      }else {
-        fileName = base64;
+        this.msgArr.push(response_msg);
+        this.scrollToBottom();
       }
     },
     startRecord(){
@@ -211,12 +187,19 @@ export default {
         response.duration = audio_blob.size/32000;
         response.datetime = parseTime(response.timestamp);
         this.msgArr.push(response)
+        this.scrollToBottom();
       }
     },
     switchInput(){
       this.is_text = !this.is_text;
       this.is_audio = !this.is_audio;
     },
+    scrollToBottom () {
+      this.$nextTick(() => {
+          var container = document.getElementById("chatWindow")
+          container.scrollTop = container.scrollHeight;
+      })
+    }
   },
   mounted(){
     navigator.mediaDevices.getUserMedia({ audio: true }); 
@@ -243,19 +226,29 @@ export default {
   border-style: solid;
   position:absolute;
   width: 92%;
-  height: 98%;
+  height: 95%;
+  overflow:auto;
+}
+
+.chatInput{
+  bottom: 1.3%;
+  width: 92%;
+  left: 6.5%;
+  height: 2%;
+  border: 1px solid black;
+  position: absolute
 }
 .chatInputMsg{
-  bottom: 1%;
+  bottom: 1.3%;
   width: 95%;
-  position: inherit;
+  position: absolute;
 }
 
 .audioInputMsg{
-  bottom: 1%;
+  bottom: 1.3%;
   left: 70%;
   right: 5%;
-  position: inherit;
+  position: absolute;
 }
 
 input{
@@ -271,7 +264,7 @@ button{
 .switchInputButton{
   position:absolute;
   right: 3%;
-  bottom: 1%;
+  bottom: 1.3%;
 }
 
 .windowTop{
@@ -341,6 +334,9 @@ li.msg_sender_1 div {
   bottom: 120%;
 }
 
+#msg_end{
+  display: none;
+}
 
 
 </style>
