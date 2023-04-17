@@ -28,6 +28,7 @@
 import { parseTime } from "@/utils/date";
 import Recorder from 'js-audio-recorder';
 import roundNum from '@/utils/round'
+import api from "@/api";
 
 export default {
   name: 'ChatWindow',
@@ -71,10 +72,9 @@ export default {
     }
   },
   methods:{
-    sendChatTextMsg(){
-      // TODO 网络请求发送
+    async sendChatTextMsg(){
+      // 网络请求发送
       if(this.textMsg.content!=""){
-          console.log(this.textMsg.content)
         this.textMsg.timestamp = new Date().getTime();
         this.textMsg.datetime = parseTime(this.textMsg.timestamp)
         this.msgArr.push(this.textMsg);
@@ -85,14 +85,13 @@ export default {
           content_type: 0,
           sender_type: 0
         };
-        const timestamp_now = new Date().getTime();
-        const response_msg = {
-          timestamp: timestamp_now,
-          datetime: parseTime(timestamp_now),
-          content: "a response text msg",
-          content_type: 0,
-          sender_type: 1
-        }
+        // const response_msg = {
+        //   content: "a response text msg",
+        //   content_type: 0,
+        //   sender_type: 1
+        // }
+        let response_msg = await api.getTextMsgResponse();
+        response_msg.datetime = parseTime(response_msg.timestamp);
         this.msgArr.push(response_msg)
       }
     },
@@ -153,7 +152,6 @@ export default {
     this.recorderObj = recorder;
   },
   updated(){
-    console.log('updated');
   },
   unmounted(){
     this.recorderObj = null;

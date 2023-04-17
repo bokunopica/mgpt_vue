@@ -8,6 +8,10 @@ const api = {
         let data = axios_instance.get(url);
         return data.images[0].url;
     },
+    async getTextMsgResponse(){
+        let result = await axios_instance.post(path.baseUrl+path.mgptTextMsg);
+        return result.data
+    }
 }
 
 export default api;
