@@ -104,7 +104,7 @@ export default {
       // 结束录音
       this.record_status_msg = "长按录音"
       this.recorderObj.stop();
-      this.audioMsg.content = this.recorderObj.getWAVBlob();
+      this.audioMsg.content = this.recorderObj.getPCMBlob();
       this.audioMsg.duration = roundNum(this.recorderObj.duration, 2);
     },
     playRecord(){
@@ -114,7 +114,6 @@ export default {
     },
     playMsgRecord(content){
       this.recorderObj.play(content);
-      // this.recorderObj.downloadWAV('test.wav');
     },
     sendChatAudioMsg(){
       // 网络请求发送
