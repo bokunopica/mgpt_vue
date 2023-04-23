@@ -39,6 +39,7 @@ export default {
   data(){
     return {
       msgArr: [
+        // example
         // {
         //   timestamp: 1681622395180,
         //   datetime: parseTime(1681622395180),
@@ -72,10 +73,11 @@ export default {
         text_content: "",
         audio_url: "",
       },
-      is_text: 0,
-      is_audio: 1,
+      is_text: 1,
+      is_audio: 0,
       record_status_msg: "长按录音",
       recorderObj: null,
+      history: []
     }
   },
   methods:{
@@ -85,6 +87,10 @@ export default {
         this.textMsg.timestamp = new Date().getTime();
         this.textMsg.datetime = parseTime(this.textMsg.timestamp)
         this.msgArr.push(this.textMsg);
+        
+        let prompt = this.textMsg.content
+        let history = this.history
+
         this.textMsg = {
           timestamp: 0,
           datetime: "",
@@ -92,16 +98,25 @@ export default {
           content_type: 0,
           sender_type: 0
         };
-        // const response_msg = {
-        //   content: "a response text msg",
-        //   content_type: 0,
-        //   sender_type: 1
-        // }
+
         let response_msg = await api.getTextMsgResponse({
-          "question": this.textMsg.content
+          "prompt": prompt,
+          "history": history,
         });
-        response_msg.datetime = parseTime(response_msg.timestamp);
-        this.msgArr.push(response_msg);
+        response_msg.datetime = parseTime(response_msg.timestamp)
+
+        this.msgArr.push({
+          timestamp: response_msg.timestamp,
+          datetime: response_msg.datetime,
+          content: response_msg.content,
+          content_type: response_msg.content_type,
+          sender_type: response_msg.sender_type
+        });
+        if(response_msg.history){
+          this.history = response_msg.history;
+        }
+
+        
         this.scrollToBottom();
       }
     },
@@ -122,7 +137,6 @@ export default {
       // 播放录音
       // Recorder.playAudio(this.audioMsg.content);
       this.recorderObj.play();
-      this.recorderObj.downloadWAV('test')
     },
     playMsgRecord(content){
       // Recorder.playAudio(content);
@@ -134,8 +148,6 @@ export default {
         // PCM流数据写入formData
         var formData = new FormData();
         formData.append('audio', this.audioMsg.content);
-        console.log(formData.get('audio'));
-
         this.audioMsg.timestamp = new Date().getTime();
         this.audioMsg.datetime = parseTime(this.audioMsg.timestamp);
         
@@ -145,16 +157,19 @@ export default {
 
         // audio_url
         this.audioMsg.audio_url = window.URL.createObjectURL(this.audioMsg.content)
-        
-
         this.msgArr.push(this.audioMsg);
         
-        // ask the question
-        // get audio return
-        let buf_response = await api.getAudioMsgResponse({
-          "question": this.audioMsg.text_content
-        });
 
+        // 文字数据返回
+        let response_msg = await api.getTextMsgResponse({
+          "prompt": this.textMsg.content,
+          "history": this.history,
+        });
+        response_msg.datetime = parseTime(response_msg.timestamp);
+        this.msgArr.push(response_msg);
+        if(response_msg.history){
+          this.history = response_msg.history;
+        }
         this.audioMsg = {
           timestamp: 0,
           datetime: "",
@@ -167,26 +182,32 @@ export default {
           audio_url: "",
         };
 
-        var audio_blob = new Blob(
-          [buf_response], 
-          {type:'audio/wav'},
-        ); 
+        // 音频数据返回
+        // ask the question
+        // get audio return
+        // let buf_response = await api.getAudioMsgResponse({
+        //   "question": this.audioMsg.text_content
+        // });
+        // var audio_blob = new Blob(
+        //   [buf_response], 
+        //   {type:'audio/wav'},
+        // ); 
 
-        let response = {
-          timestamp: new Date().getTime(),
-          datetime: "",
-          content: null,
-          pcm_content: null,
-          content_type: 1,
-          sender_type: 1,
-          duration: 0,
-          text_content: "",
-          audio_url: window.URL.createObjectURL(audio_blob),
-        };
-        response.content = audio_blob;
-        response.duration = audio_blob.size/32000;
-        response.datetime = parseTime(response.timestamp);
-        this.msgArr.push(response)
+        // let response = {
+        //   timestamp: new Date().getTime(),
+        //   datetime: "",
+        //   content: null,
+        //   pcm_content: null,
+        //   content_type: 1,
+        //   sender_type: 1,
+        //   duration: 0,
+        //   text_content: "",
+        //   audio_url: window.URL.createObjectURL(audio_blob),
+        // };
+        // response.content = audio_blob;
+        // response.duration = audio_blob.size/32000;
+        // response.datetime = parseTime(response.timestamp);
+        // this.msgArr.push(response)
         this.scrollToBottom();
       }
     },
