@@ -162,7 +162,7 @@ export default {
 
         // 文字数据返回
         let response_msg = await api.getTextMsgResponse({
-          "prompt": this.textMsg.content,
+          "prompt": a2t_response['text'],
           "history": this.history,
         });
         response_msg.datetime = parseTime(response_msg.timestamp);
