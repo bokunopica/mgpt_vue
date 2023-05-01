@@ -35,7 +35,7 @@ import roundNum from '@/utils/round';
 import api from "@/api";
 
 export default {
-  name: 'ChatWindow',
+  name: 'ChatWindowWebSocket',
   data(){
     return {
       msgArr: [

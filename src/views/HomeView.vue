@@ -1,16 +1,16 @@
 <template>
-  <ChatWindow />
+  <ChatWindowHTTP />
 </template>
 
 <script>
-import ChatWindow from '@/components/ChatWindow.vue';
+import ChatWindowHTTP from '@/components/ChatWindowHTTP.vue';
 
 
 
 export default {
   name: 'HomeView',
   components: {
-    ChatWindow,
+    ChatWindowHTTP,
   }
 }
 </script>

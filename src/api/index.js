@@ -20,7 +20,6 @@ const api = {
         return data.images[0].url;
     },
     async getTextMsgResponse(data){
-        console.log(data)
         let result = await axios({
             method: 'post',
             url: path.baseUrl+path.mgptTextMsg,

@@ -13,9 +13,14 @@ export default {
     return {
       sideBarRows: [
         {
-          "to": "/",
-          "title": "chat"
+          "to": "/chat",
+          "title": "ws"
         },
+        {
+          "to": "/",
+          "title": "http"
+        },
+        
       ]
     }
   }
