@@ -33,6 +33,7 @@ import { parseTime } from "@/utils/date";
 import Recorder from 'js-audio-recorder';
 import roundNum from '@/utils/round';
 import api from "@/api";
+import { socket } from "@/socket";
 
 export default {
   name: 'ChatWindowWebSocket',
@@ -77,7 +78,8 @@ export default {
       is_audio: 0,
       record_status_msg: "长按录音",
       recorderObj: null,
-      history: []
+      history: [],
+      test_text: ""
     }
   },
   methods:{
@@ -98,7 +100,11 @@ export default {
           content_type: 0,
           sender_type: 0
         };
+        
 
+        // TODO 转为socket形式
+        // socket.emit('model_text_response', {'data': true})
+        
         let response_msg = await api.getTextMsgResponse({
           "prompt": prompt,
           "history": history,
@@ -161,6 +167,11 @@ export default {
         
 
         // 文字数据返回
+
+        // TODO 转为socket形式
+        // socket.emit('model_text_response', {'data': true})
+
+
         let response_msg = await api.getTextMsgResponse({
           "prompt": a2t_response['text'],
           "history": this.history,
@@ -231,11 +242,22 @@ export default {
       compiling: false,       // 是否边录边转换，默认是false
     });
     this.recorderObj = recorder;
+
+    // socket.io
+    socket.connect();
+
+    // 监听模型回复的任务
+    socket.on('model_text_response', (data)=>{
+      data = JSON.parse(data);
+      // TODO 根据对应id来更新相应消息
+      console.log(data);
+    })    
   },
   updated(){
   },
   unmounted(){
     this.recorderObj = null;
+    socket.disconnect();
   }
 }
 </script>
