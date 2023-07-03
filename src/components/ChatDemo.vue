@@ -3,7 +3,7 @@
     <ul>
       <li v-for="(msg, index) in msgArr" :class="`msg_sender_${msg.sender_type}`">
         <span class="sender">{{ (msg.sender_type?"服务器":"你") + "[" + msg.datetime+ "]:"   }} </span><br>
-        <span class="msgContent">{{ msg.text_content }}</span>
+        <span class="msgContent">{{ msg.content }}</span>
       </li>
     </ul>
     <div><a id="msg_end" name="1" href="#1">&nbsp</a></div>
@@ -11,7 +11,7 @@
   <div class="chatInput">
     <div class="chatInputMsg">
       <input type="text" v-model="textMsg.content" @keyup.enter.native="sendChatTextMsg">
-      <button @click="sendChatTextMsg">发送</button>
+      <button @click="sendChatTextMsg" v-bind:disabled="button_lock">发送</button>
     </div>
   </div>
 
@@ -19,9 +19,7 @@
 
 <script>
 import { parseTime } from "@/utils/date";
-import Recorder from 'js-audio-recorder';
-import roundNum from '@/utils/round';
-import api from "@/api";
+import { get_uuid } from "@/utils/uuid"
 import { socket } from "@/socket";
 
 export default {
@@ -55,19 +53,27 @@ export default {
       is_text: 1,
       is_audio: 0,
       history: [],
-      test_text: ""
+      test_text: "",
+      button_lock: 0,
     }
   },
   methods:{
     async sendChatTextMsg(){
+      // button lock
+      if(this.button_lock==0){
+        this.button_lock = 1;
+      }else{
+        return ;
+      }
       // 网络请求发送
       if(this.textMsg.content!=""){
         this.textMsg.timestamp = new Date().getTime();
-        this.textMsg.datetime = parseTime(this.textMsg.timestamp)
+        this.textMsg.datetime = parseTime(this.textMsg.timestamp);
         this.msgArr.push(this.textMsg);
         
-        let prompt = this.textMsg.content
-        let history = this.history
+        let query = this.textMsg.content;
+        let history = this.history;
+        console.log(history);
 
         this.textMsg = {
           timestamp: 0,
@@ -76,34 +82,31 @@ export default {
           content_type: 0,
           sender_type: 0
         };
+        // 转为socket形式
+        let _request_id = get_uuid();
+        socket.emit(
+          'model_text_response', 
+          {
+            'query': query,
+            'history': history,
+            '_request_id': _request_id,
+          },
+        )
         
-        // TODO 转为socket形式
-        socket.emit('model_text_response', {'data': prompt})
+        let current_timestamp = new Date().getTime();
         
-        let response_msg = await api.getTextMsgResponse({
-          "prompt": prompt,
-          "history": history,
-        });
-        response_msg.datetime = parseTime(response_msg.timestamp)
-
-        this.msgArr.push({
-          timestamp: response_msg.timestamp,
-          datetime: response_msg.datetime,
-          content: response_msg.content,
-          content_type: response_msg.content_type,
-          sender_type: response_msg.sender_type
-        });
-        if(response_msg.history){
-          this.history = response_msg.history;
+        let response_msg = {
+          timestamp: current_timestamp,
+          datetime: parseTime(current_timestamp),
+          content: '',
+          content_type: 0,
+          sender_type: 1,
+          _request_id: _request_id,
         }
 
-        
+        this.msgArr.push(response_msg);
         this.scrollToBottom();
       }
-    },
-    playMsgRecord(content){
-      // Recorder.playAudio(content);
-      this.recorderObj.play(content);
     },
     scrollToBottom () {
       this.$nextTick(() => {
@@ -115,15 +118,31 @@ export default {
   mounted(){
     // socket.io
     socket.connect();
-
     // 监听模型回复的任务
     socket.on('model_text_response', (data)=>{
       data = JSON.parse(data);
       // TODO 根据对应id来更新相应消息
-      console.log(data);
+      if(data.is_end){
+        for (let i = 0; i<this.msgArr.length; i++){
+          if(this.msgArr[i]._request_id==data._request_id){
+            console.log(data);
+            this.history = data.history;
+            break;
+          }
+        }
+      }else{
+        for (let i = 0; i<this.msgArr.length; i++) { 
+          if(this.msgArr[i]._request_id==data._request_id){
+            this.msgArr[i].content = data.content;
+            this.button_lock = 0;
+            break; 
+          }
+        }
+      }
     })    
   },
   updated(){
+    
   },
   unmounted(){
     socket.disconnect();
