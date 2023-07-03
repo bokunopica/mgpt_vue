@@ -6,19 +6,22 @@
   <div class="mainDiv">
     
   </div>
-  <SideBar />
-  <router-view/>
+  <ChatDemo />
+  <!-- <SideBar /> -->
+  <!-- <router-view/> -->
   
 </template>
 
 <script>
 import SideBar from './components/SideBar.vue';
+import ChatDemo from './components/ChatDemo.vue';
 import api from './api/index'
 
 export default{
   name: 'App',
   components: {
-    SideBar
+    SideBar,
+    ChatDemo
   },
 }
 
@@ -48,7 +51,7 @@ nav a.router-link-exact-active {
 }
 
 .mainDiv{
-  background-image: url("https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE4wHeX?ver=a93f");
+  /* background-image: url("https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE4wHeX?ver=a93f"); */
   width: 100%;
   height: 100%;
   position: fixed;
