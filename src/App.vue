@@ -3,9 +3,9 @@
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link>
   </nav> -->
-  <div class="mainDiv">
+  <!-- <div class="mainDiv">
     
-  </div>
+  </div> -->
   <ChatDemo />
   <!-- <SideBar /> -->
   <!-- <router-view/> -->
