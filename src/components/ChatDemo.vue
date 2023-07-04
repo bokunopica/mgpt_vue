@@ -6,11 +6,11 @@
   <div class="chatWindow" id="chatWindow">
     <ul>
       <li v-for="(msg, index) in msgArr" :class="`msg_sender_${msg.sender_type}`">
-        <span class="sender">{{ (msg.sender_type?"服务器":"你") + "[" + msg.datetime+ "]:"   }} </span><br>
-        <span class="msgContent">{{ msg.content }}</span>
+        <img :src="msg.sender_type?'img/icons/medglm_avatar.jpg':'img/icons/user_avatar.png'" alt="" class="chatAvatar">
+        <br>
+        <div class="msgContent">{{ msg.content }}</div>
       </li>
     </ul>
-    <div><a id="msg_end" name="1" href="#1">&nbsp</a></div>
   </div>
   <div class="chatInput">
     <div class="chatInputMsg">
@@ -225,16 +225,6 @@ export default {
   position: fixed;
 }
 
-.msg_sender_0{
-  position:relative;
-  right: 0;
-}
-
-.msg_sender_1{
-  position:relative;
-  left: 0;
-}
-
 ul {
   list-style: none;
   padding: 20px;
@@ -246,50 +236,30 @@ ul {
 li.msg_sender_1 {
   margin-right: 20px;
   text-align: left;
-}
-
-li.msg_sender_1 span {
-  display: inline-block;
-  /* border-radius: 0 15px 15px; */
-  background-color: rgba(0, 0, 0, 0.1);
-  padding: 10px 15px;
+  position: relative;
 }
 
 li.msg_sender_0 {
   margin-left: 20px;
   text-align: right;
+  position: relative;
 }
 
-li.msg_sender_0 span {
+.chatAvatar{
+  width: 32px;
+  height: 32px;
+  position: relative;
+}
+
+.msgContent{
+  margin-top: 1%;
   display: inline-block;
-  /* border-radius: 15px 0 15px 15px; */
+  inline-size: auto;
+  border-radius: 15px 15px 15px 15px;
   background-color: rgba(0, 0, 0, 0.1);
   padding: 10px 15px;
+  position: relative;
 }
-
-li.msg_sender_0 div {
-  display: inline-block;
-  /* border-radius: 15px 0 15px 15px; */
-  background-color: rgba(0, 0, 0, 0.1);
-  padding: 10px 15px;
-}
-
-li.msg_sender_1 div {
-  display: inline-block;
-  /* border-radius: 15px 0 15px 15px; */
-  background-color: rgba(0, 0, 0, 0.1);
-  padding: 10px 15px;
-}
-
-.playAudioTest{
-  position:absolute;
-  bottom: 120%;
-}
-
-#msg_end{
-  display: none;
-}
-
 
 </style>
 
