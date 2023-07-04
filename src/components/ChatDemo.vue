@@ -171,7 +171,7 @@ export default {
 
 .topBar img{
   height: 4%;
-  left: 3%;
+  left: 0.5%;
   top: 0.5%;
   position: fixed;
 }
